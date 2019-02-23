@@ -35,9 +35,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Modified version of node-downloader-helper version 1.0.10
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               */
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var DH_STATES = exports.DH_STATES = {
     IDLE: 'IDLE',
@@ -109,10 +107,8 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
                     _this2.__setState(_this2.__states.STARTED);
                 }
 
-                // Start the Download
                 _this2.__request = _this2.__downloadRequest(resolve, reject);
 
-                // Error Handling
                 _this2.__request.on('error', function (err) {
                     if (_this2.__fileStream) {
                         _this2.__fileStream.close(function () {
@@ -168,7 +164,6 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
             this.__setState(this.__states.STOPPED);
             return new Promise(function (resolve, reject) {
                 fs.access(_this3.__filePath, function (_accessErr) {
-                    // if can't access, probably is not created yet
                     if (_accessErr) {
                         _this3.emit('stop');
                         return resolve(true);
@@ -197,14 +192,12 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
             var _this4 = this;
 
             return this.__protocol.request(this.__options, function (response) {
-                //Stats
                 if (!_this4.__isResumed) {
                     _this4.__total = parseInt(response.headers['content-length']);
                     _this4.__downloaded = 0;
                     _this4.__progress = 0;
                 }
 
-                // Handle Redirects
                 if (response.statusCode > 300 && response.statusCode < 400 && response.headers.hasOwnProperty('location') && response.headers.location) {
                     _this4.__isRedirected = true;
                     _this4.__initProtocol(response.headers.location);
@@ -217,7 +210,6 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
                     });
                 }
 
-                // check if response is success
                 if (response.statusCode !== 200 && response.statusCode !== 206) {
                     var err = new Error('Response status was ' + response.statusCode);
                     _this4.emit('error', err);
@@ -242,7 +234,6 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
             this.__filePath = this.__getFilePath(this.__fileName);
             this.__fileStream = fs.createWriteStream(this.__filePath, this.__isResumed ? { 'flags': 'a' } : {});
 
-            // Start Downloading
             this.emit('download');
             this.__isResumed = false;
             this.__isRedirected = false;
@@ -283,12 +274,6 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
         value: function __getFileNameFromHeaders(headers) {
             var fileName = '';
 
-            /*if (this.__opts.fileName) {
-                return this.__opts.fileName;
-            }*/
-
-            //modified version of the naming system to fix some issues
-            // Get Filename
             if (headers.hasOwnProperty('content-disposition') && headers['content-disposition'].indexOf('filename=') > -1) {
 
                 fileName = headers['content-disposition'];
@@ -299,13 +284,10 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
                 fileName = path.basename(URL.parse(this.requestURL).pathname);
             }
 
-            //TODO: Modify paramters to allow file name and file extension seperately
             if (this.__opts.fileName) {
                 if (this.__opts.fileName.includes('.')) {
-                    //has a defined extension
                     return this.__opts.fileName;
                 } else {
-                    //only name with no defined extension
                     var ext = fileName.substring(fileName.lastIndexOf('.'));
                     return this.__opts.fileName + ext;
                 }
@@ -333,9 +315,7 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
             this.__downloaded += receivedBytes;
             this.__progress = this.__downloaded / this.__total * 100;
 
-            // emit the progress every second or if finished
             if (this.__downloaded === this.__total || elaspsedTime > 1000) {
-                // Calculate the speed
                 this.__statsEstimate.time = currentTime;
                 this.__statsEstimate.bytes = this.__downloaded - this.__statsEstimate.prevBytes;
                 this.__statsEstimate.prevBytes = this.__downloaded;
@@ -429,7 +409,6 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
             }
 
             try {
-                //sets a unique name to the file
                 fs.accessSync(path, fs.F_OK);
                 var pathInfo = path.match(/(.*)(\([0-9]+\))(\..*)$/);
                 var base = pathInfo ? pathInfo[1].trim() : path;
