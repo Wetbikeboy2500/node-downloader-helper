@@ -1,3 +1,7 @@
+/*
+Modified version of node-downloader-helper version 1.0.10
+*/
+
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -205,7 +209,8 @@ export class DownloaderHelper extends EventEmitter {
                 if (this.state !== this.__states.PAUSED &&
                     this.state !== this.__states.STOPPED) {
                     this.__setState(this.__states.FINISHED);
-                    this.emit('end');
+                    //this.emit('end', {path: this.__filePath, fileName: this.__fileName});
+                    this.emit('end', this.__fileName);
                 }
                 return resolve(true);
             });
@@ -224,10 +229,11 @@ export class DownloaderHelper extends EventEmitter {
     __getFileNameFromHeaders(headers) {
         let fileName = '';
 
-        if (this.__opts.fileName) {
+        /*if (this.__opts.fileName) {
             return this.__opts.fileName;
-        }
+        }*/
 
+        //modified version of the naming system to fix some issues
         // Get Filename
         if (headers.hasOwnProperty('content-disposition') &&
             headers['content-disposition'].indexOf('filename=') > -1) {
@@ -238,6 +244,16 @@ export class DownloaderHelper extends EventEmitter {
             fileName = fileName.replace(new RegExp('"', 'g'), '');
         } else {
             fileName = path.basename(URL.parse(this.requestURL).pathname);
+        }
+
+        //TODO: Modify paramters to allow file name and file extension seperately
+        if (this.__opts.fileName) {
+            if (this.__opts.fileName.includes('.')) { //has a defined extension
+                return this.__opts.fileName;
+            } else { //only name with no defined extension
+                const ext = fileName.substring(fileName.lastIndexOf('.'));
+                return this.__opts.fileName + ext;
+            }
         }
 
         return fileName;
@@ -349,6 +365,7 @@ export class DownloaderHelper extends EventEmitter {
         }
 
         try {
+            //sets a unique name to the file
             fs.accessSync(path, fs.F_OK);
             let pathInfo = path.match(/(.*)(\([0-9]+\))(\..*)$/);
             let base = pathInfo ? pathInfo[1].trim() : path;

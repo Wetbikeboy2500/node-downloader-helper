@@ -35,7 +35,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /*
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               Modified version of node-downloader-helper version 1.0.10
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               */
 
 var DH_STATES = exports.DH_STATES = {
     IDLE: 'IDLE',
@@ -259,7 +261,8 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
                     }
                     if (_this5.state !== _this5.__states.PAUSED && _this5.state !== _this5.__states.STOPPED) {
                         _this5.__setState(_this5.__states.FINISHED);
-                        _this5.emit('end');
+                        //this.emit('end', {path: this.__filePath, fileName: this.__fileName});
+                        _this5.emit('end', _this5.__fileName);
                     }
                     return resolve(true);
                 });
@@ -281,10 +284,11 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
         value: function __getFileNameFromHeaders(headers) {
             var fileName = '';
 
-            if (this.__opts.fileName) {
+            /*if (this.__opts.fileName) {
                 return this.__opts.fileName;
-            }
+            }*/
 
+            //modified version of the naming system to fix some issues
             // Get Filename
             if (headers.hasOwnProperty('content-disposition') && headers['content-disposition'].indexOf('filename=') > -1) {
 
@@ -294,6 +298,18 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
                 fileName = fileName.replace(new RegExp('"', 'g'), '');
             } else {
                 fileName = path.basename(URL.parse(this.requestURL).pathname);
+            }
+
+            //TODO: Modify paramters to allow file name and file extension seperately
+            if (this.__opts.fileName) {
+                if (this.__opts.fileName.includes('.')) {
+                    //has a defined extension
+                    return this.__opts.fileName;
+                } else {
+                    //only name with no defined extension
+                    var ext = fileName.substring(fileName.lastIndexOf('.'));
+                    return this.__opts.fileName + ext;
+                }
             }
 
             return fileName;
@@ -414,6 +430,7 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
             }
 
             try {
+                //sets a unique name to the file
                 fs.accessSync(path, fs.F_OK);
                 var pathInfo = path.match(/(.*)(\([0-9]+\))(\..*)$/);
                 var base = pathInfo ? pathInfo[1].trim() : path;
