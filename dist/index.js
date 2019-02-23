@@ -261,8 +261,7 @@ var DownloaderHelper = exports.DownloaderHelper = function (_EventEmitter) {
                     }
                     if (_this5.state !== _this5.__states.PAUSED && _this5.state !== _this5.__states.STOPPED) {
                         _this5.__setState(_this5.__states.FINISHED);
-                        //this.emit('end', {path: this.__filePath, fileName: this.__fileName});
-                        _this5.emit('end', _this5.__fileName);
+                        _this5.emit('end', { path: _this5.__filePath });
                     }
                     return resolve(true);
                 });

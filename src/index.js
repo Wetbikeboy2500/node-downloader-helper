@@ -209,8 +209,7 @@ export class DownloaderHelper extends EventEmitter {
                 if (this.state !== this.__states.PAUSED &&
                     this.state !== this.__states.STOPPED) {
                     this.__setState(this.__states.FINISHED);
-                    //this.emit('end', {path: this.__filePath, fileName: this.__fileName});
-                    this.emit('end', this.__fileName);
+                    this.emit('end', {path: this.__filePath});
                 }
                 return resolve(true);
             });
